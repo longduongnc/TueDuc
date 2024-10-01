@@ -1,29 +1,41 @@
 const express = require('express');
-const { Pool } = require('pg');
-const app = express();
-const port = 5000;
+const { Pool } = require('pg'); // PostgreSQL client
+require('dotenv').config(); // Load environment variables from .env file
 
-// Set up the PostgreSQL connection using a Pool
+// Initialize Express
+const app = express();
+
+// Middleware to parse JSON requests
+app.use(express.json());
+
+// Set up PostgreSQL connection pool
 const pool = new Pool({
-  user: 'dbuser',        // PostgreSQL username
-  host: 'localhost',        // PostgreSQL server host (localhost if running locally)
-  database: 'tueduc',      // Name of the database you want to connect to
-  password: '1111',   // PostgreSQL user password
-  port: 5432,               // PostgreSQL default port
+  user: process.env.DB_USER,
+  host: process.env.DB_HOST,
+  database: process.env.DB_NAME,
+  password: process.env.DB_PASSWORD,
+  port: process.env.DB_PORT,
 });
 
-// A route to test the connection to PostgreSQL
-app.get('/db', async (req, res) => {
+// Test route to verify the server is running
+app.get('/', (req, res) => {
+  res.send('Express server is up and running!');
+});
+
+// API route to fetch data from the database
+app.get('/api/users', async (req, res) => {
   try {
-    const result = await pool.query('SELECT NOW()');  // Test query
-    res.json(result.rows);  // Return the result from PostgreSQL
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Database error' });
+    const result = await pool.query('SELECT * FROM users'); // Replace with your actual query/table name
+    res.json(result.rows); // Send the data back as JSON
+  } catch (error) {
+    console.error('Error querying the database:', error);
+    res.status(500).json({ message: 'Server Error' });
   }
 });
 
-// Start the Express server
-app.listen(port, () => {
-  console.log(`Server running on http://localhost:${port}`);
+// Start the server on a specific port
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 });
+
