@@ -1,0 +1,22 @@
+# docker-compose.yml
+version: '3.8'
+services:
+  frontend:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    ports:
+      - '3000:80'  # Map localhost:3000 to container's port 80 (Nginx)
+    environment:
+      - NODE_ENV=production
+    restart: always
+
+  backend:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    ports:
+      - '5000:5000'  # Map localhost:5000 to container's port 5000 (Express)
+    environment:
+      - NODE_ENV=production
+    restart: always
